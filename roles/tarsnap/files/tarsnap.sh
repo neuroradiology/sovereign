@@ -4,7 +4,7 @@
 # Written by Tim Bishop, 2009.
 
 # Directories to backup (relative to /)
-DIRS="home root decrypted var/www"
+DIRS="home root decrypted var/www etc/letsencrypt"
 
 # Number of daily backups to keep
 DAILY=7
@@ -58,6 +58,7 @@ fi
 cd /home/
 
 # Dump PostgreSQL to file
+umask 077
 sudo -u postgres pg_dumpall -c | gzip > /decrypted/postgresql-backup.sql.gz
 
 # Do backups

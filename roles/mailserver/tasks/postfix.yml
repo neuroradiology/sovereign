@@ -1,35 +1,18 @@
-- name: Install Postfix 9.1 and related packages
+- name: Install Postfix and related packages
   apt: pkg={{ item }} state=installed
   with_items:
     - libsasl2-modules
     - postfix
     - postfix-pcre
     - postfix-pgsql
-    - postgresql-9.1
     - postgrey
     - python-psycopg2
     - sasl2-bin
-  when: ansible_distribution_release != 'trusty'
-
-- name: Install Postfix 9.3 and related packages for Ubuntu Trusty
-  apt: pkg={{ item }} state=installed
-  with_items:
-    - libsasl2-modules
-    - postfix
-    - postfix-pcre
-    - postfix-pgsql
-    - postgresql-9.3
-    - postgrey
-    - python-psycopg2
-    - sasl2-bin
-  when: ansible_distribution_release == 'trusty'
-
-- name: Set postgres password
-  command: sudo -u {{ db_admin_username }} psql -d {{ db_admin_username }} -c "ALTER USER postgres with  password '{{ db_admin_password }}';"
-  notify: import sql postfix
+  tags:
+    - dependencies
 
 - name: Create database user for mail server
-  postgresql_user: login_host=localhost login_user={{ db_admin_username }} login_password="{{ db_admin_password }}" name={{ mail_db_username }} password="{{ mail_db_password }}" state=present
+  postgresql_user: login_host=localhost login_user={{ db_admin_username }} login_password="{{ db_admin_password }}" name={{ mail_db_username }} password="{{ mail_db_password }}" encrypted=yes state=present
   notify: import sql postfix
 
 - name: Create database for mail server
@@ -69,3 +52,5 @@
   with_items:
     - smtp
     - ssmtp
+    - submission
+  tags: ufw
